@@ -15,6 +15,7 @@ func dataReading() (float64, string, string) {
 }
 
 func main() {
+	// Получение данных
 	number, currency1, currency2 := dataReading()
 	fmt.Printf("%v в %v = %.2f \n", currency1, currency2, number)
 
