@@ -61,40 +61,36 @@ func createNumber() float64 {
 	}
 }
 
-// func dataReading() (float64, string, string) {
-// 	currency1 := createCurrency1()
-// 	currency2 := createCurrency2()
-// 	number := createNumber()
-// 	return number, currency1, currency2
-// }
+type Converter func(float64) float64
+
+var rates = map[[2]string]Converter{
+	{"USD", "RUB"}: func(x float64) float64 { return x * usdRub },
+	{"USD", "EUR"}: func(x float64) float64 { return x * usdEur },
+	{"EUR", "RUB"}: func(x float64) float64 { return x * rubEur },
+	{"EUR", "USD"}: func(x float64) float64 { return x / usdEur },
+	{"RUB", "USD"}: func(x float64) float64 { return x / usdRub },
+	{"RUB", "EUR"}: func(x float64) float64 { return x / rubEur },
+}
+
+func Convert(number float64, currency1, currency2 string) float64 {
+	if f, ok := rates[[2]string{currency1, currency2}]; ok {
+		return f(number)
+	}
+	return number
+}
+
+const usdEur float64 = 0.87
+const usdRub float64 = 83.87
+
+// EUR в RUB
+const rubEur float64 = usdRub / usdEur
 
 func main() {
 	number := createNumber()
 	currency1 := createCurrency1()
 	currency2 := createCurrency2()
 
-	const usdEur float64 = 0.87
-	const usdRub float64 = 83.87
-
-	// EUR в RUB
-	const rubEur float64 = usdRub / usdEur
-	var result float64
-
-	if currency1 == "USD" && currency2 == "RUB" {
-		result = number * usdRub
-	} else if currency1 == "USD" && currency2 == "EUR" {
-		result = number * usdEur
-	} else if currency1 == "EUR" && currency2 == "RUB" {
-		result = number * rubEur
-	} else if currency1 == "EUR" && currency2 == "USD" {
-		result = number / usdEur
-	} else if currency1 == "RUB" && currency2 == "USD" {
-		result = number / usdRub
-	} else if currency1 == "RUB" && currency2 == "EUR" {
-		result = number / rubEur
-	} else {
-		result = number
-	}
+	result := Convert(number, currency1, currency2)
 
 	fmt.Printf("%.2F %v = %.2f %v", number, currency1, result, currency2)
 }
