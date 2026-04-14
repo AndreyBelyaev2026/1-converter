@@ -15,11 +15,7 @@ func contains(slice []string, item string) bool {
 
 func checkContains(currency string) bool {
 	currencyBase := []string{"USD", "EUR", "RUB"}
-	if contains(currencyBase, currency) {
-		return true
-	} else {
-		return false
-	}
+	return contains(currencyBase, currency)
 }
 
 func createCurrency1() string {
@@ -51,7 +47,7 @@ func createCurrency2() string {
 func createNumber() float64 {
 	var number float64
 	for {
-		fmt.Printf("Введите количество для конвертации, введенное число должнобыть положительным. (Например: 10.0)= ")
+		fmt.Printf("Введите количество для конвертации, введенное число должно быть положительным. (Например: 10.0)= ")
 		fmt.Scan(&number)
 		if number > 0 {
 			return number
@@ -63,34 +59,35 @@ func createNumber() float64 {
 
 type Converter func(float64) float64
 
-var rates = map[[2]string]Converter{
-	{"USD", "RUB"}: func(x float64) float64 { return x * usdRub },
-	{"USD", "EUR"}: func(x float64) float64 { return x * usdEur },
-	{"EUR", "RUB"}: func(x float64) float64 { return x * rubEur },
-	{"EUR", "USD"}: func(x float64) float64 { return x / usdEur },
-	{"RUB", "USD"}: func(x float64) float64 { return x / usdRub },
-	{"RUB", "EUR"}: func(x float64) float64 { return x / rubEur },
-}
-
-func Convert(number float64, currency1, currency2 string) float64 {
-	if f, ok := rates[[2]string{currency1, currency2}]; ok {
-		return f(number)
-	}
-	return number
-}
-
 const usdEur float64 = 0.87
 const usdRub float64 = 83.87
 
 // EUR в RUB
 const rubEur float64 = usdRub / usdEur
 
+func Convert(number float64, currency1, currency2 string, rates *map[[2]string]Converter) float64 {
+	if f, ok := (*rates)[[2]string{currency1, currency2}]; ok {
+		return f(number)
+	}
+	return number
+}
+
 func main() {
+	// Передача указателя на карту
+	var rates = map[[2]string]Converter{
+		{"USD", "RUB"}: func(x float64) float64 { return x * usdRub },
+		{"USD", "EUR"}: func(x float64) float64 { return x * usdEur },
+		{"EUR", "RUB"}: func(x float64) float64 { return x * rubEur },
+		{"EUR", "USD"}: func(x float64) float64 { return x / usdEur },
+		{"RUB", "USD"}: func(x float64) float64 { return x / usdRub },
+		{"RUB", "EUR"}: func(x float64) float64 { return x / rubEur },
+	}
+
 	number := createNumber()
 	currency1 := createCurrency1()
 	currency2 := createCurrency2()
 
-	result := Convert(number, currency1, currency2)
+	result := Convert(number, currency1, currency2, &rates)
 
-	fmt.Printf("%.2F %v = %.2f %v", number, currency1, result, currency2)
+	fmt.Printf("%.2f %s = %.2f %s\n", number, currency1, result, currency2)
 }
